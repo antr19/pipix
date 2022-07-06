@@ -11,37 +11,40 @@
 # **************************************************************************** #
 
 NAME = 	pipex
-B_NAME = checker
 
-SRCS =	pipex.c
+GNL = ft_gnl/get_next_line.c
+OBJS_G = $(GNL:.c=.o)
 
-HEAD =	push_swap.h
-
+SRCS =	child.c pipex.c here_doc.c
 OBJS = 	$(SRCS:.c=.o)
-# B_OBJS = $(B_SRCS:.c=.o)
+
+HEAD =	pipex.h
 
 CC = 	cc
-# FLAGS = -Wall -Wextra -Werror
-FLAGS = 
+FLAGS = -Wall -Wextra -Werror
 RM = 	rm -f
 
 all:	$(NAME)
 
 run: $(NAME)
-	@./pipex
+#	@./pipex infile "ls -l" "wc -l" "wc -l" outfile
+	@./pipex infile "cat" "sort" "wc" "ls" "cd" "wc" outfile
+#	@./pipex here_doc LIMITER "cat -e" "wc -l"
+#	leaks --atExit -- ./$(NAME)
+	@< infile cat | sort | wc | ls | cd | wc > check_outfile
 
-$(NAME): $(OBJS)
-	$(CC) $(FLAGS) $(OBJS) -o $(NAME)
-
-bonus: $(B_NAME)
-
-$(B_NAME): $(B_OBJS)
-	$(CC) $(FLAGS) $(B_OBJS) -o $(B_NAME)
+$(NAME): $(OBJS) $(OBJS_G) 
+	$(MAKE) -C ./libft
+	$(CC) $(FLAGS) $(OBJS) $(OBJS_G) ./libft/libft.a -o $(NAME)
+ 
+bonus: $(NAME) 
 
 .c.o: $(HEAD)
 	$(CC) $(FLAGS) -c $< -o $(<:.c=.o)
 
 clean:
+	$(MAKE) clean -C ./ft_gnl
+	$(MAKE) clean -C ./libft
 	${RM} ${OBJS} $(B_OBJS)
 
 fclean: clean
